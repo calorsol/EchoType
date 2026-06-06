@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm --version)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(pkill -f vite)",
+      "Bash(git -C \"D:\\\\AI\\\\WebSite\\\\EchoType\" status --short)",
+      "mcp__Claude_Preview__preview_start"
+    ]
+  }
+}
