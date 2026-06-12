@@ -67,6 +67,34 @@ npm run build      # 输出到 dist/
 npm run preview    # 本地预览构建产物
 ```
 
+## 部署
+
+EchoType 当前线上地址：
+
+- `https://echotype.868601.xyz`
+
+如果要把最新版本发布到 Ubuntu 服务器，执行：
+
+```bash
+npm run deploy:echotype
+```
+
+这条命令会自动完成：
+
+- 构建最新的生产环境资源
+- 清空服务器上的 `/home/web/html/echotype`
+- 将本地 `dist/` 目录内容上传到服务器
+
+如果你已经提前在本地执行过构建，也可以跳过构建步骤：
+
+```bash
+powershell -ExecutionPolicy Bypass -File ./scripts/deploy-echotype.ps1 -SkipBuild
+```
+
+部署脚本位置：
+
+- `scripts/deploy-echotype.ps1`
+
 `dist/` 是纯静态文件，可直接部署到 **Vercel / Netlify / GitHub Pages** 等任意静态托管平台。
 
 ## ⌨️ 快捷键
