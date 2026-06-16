@@ -168,6 +168,7 @@ export default function App() {
   return (
     <div
       className="min-h-screen flex flex-col bg-gradient-to-b from-sand-100 to-sand-200 text-ink-600"
+      onPointerDown={resumeAudio}
       onClick={(e) => {
         // 点击空白处收起浮层
         if (e.target === e.currentTarget) closePanels()

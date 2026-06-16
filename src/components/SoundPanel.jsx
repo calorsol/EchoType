@@ -1,4 +1,4 @@
-import { KEYBOARD_PROFILES, AMBIENT_LIST } from '../audio/AudioEngine'
+import { KEYBOARD_PROFILES, AMBIENT_LIST, resumeAudio } from '../audio/AudioEngine'
 import { IconKeyboard, IconRain, IconWhite, IconFire, IconForest, IconClose } from './Icons'
 
 const AMBIENT_ICONS = {
@@ -9,7 +9,10 @@ const AMBIENT_ICONS = {
 }
 
 export default function SoundPanel({ sound, setSound, onClose }) {
-  const update = (patch) => setSound((s) => ({ ...s, ...patch }))
+  const update = (patch) => {
+    resumeAudio()
+    setSound((s) => ({ ...s, ...patch }))
+  }
   const toggleAmbient = (id) => {
     const active = { ...sound.ambients }
     active[id] = !active[id]
