@@ -14,17 +14,19 @@ import { exportTxt, exportMarkdown, copyToClipboard } from './utils/export'
 import { useTypewriterScroll } from './hooks/useTypewriterScroll'
 import SoundPanel from './components/SoundPanel'
 import StatsPanel from './components/StatsPanel'
+import AppearancePanel from './components/AppearancePanel'
 import AmbientBackdrop from './components/AmbientBackdrop'
+import { DEFAULT_APPEARANCE, resolveAppearance, buildAppearanceVars } from './theme/appearance'
 import {
   IconFocus,
   IconSound,
   IconMute,
   IconStats,
+  IconPalette,
   IconExport,
   IconFlame,
   IconLeaf,
   IconZen,
-  IconClose,
   IconCheck,
 } from './components/Icons'
 
@@ -36,15 +38,19 @@ const DEFAULT_SOUND = {
   ambientVol: { rain: 0.5, white: 0.4, fire: 0.5, forest: 0.5 },
 }
 
-const TYPED_KEYS = /^[\w\W]$/ // 单字符按键
+const TYPED_KEYS = /^[\w\W]$/
 
 export default function App() {
   const [text, setText] = useLocalStorage('echotype.doc.v1', '')
   const [sound, setSound] = useLocalStorage('echotype.sound.v1', DEFAULT_SOUND)
+  const [appearance, setAppearance] = useLocalStorage(
+    'echotype.appearance.v1',
+    DEFAULT_APPEARANCE,
+  )
   const [zen, setZen] = useLocalStorage('echotype.zen.v1', false)
   const [goal, setGoal] = useLocalStorage('echotype.goal.v1', 500)
   const [focus, setFocus] = useState(false)
-  const [panel, setPanel] = useState(null) // 'sound' | 'stats' | null
+  const [panel, setPanel] = useState(null)
   const [exportOpen, setExportOpen] = useState(false)
   const [uiVisible, setUiVisible] = useState(true)
   const [toast, setToast] = useState(null)
@@ -54,47 +60,64 @@ export default function App() {
   const textareaRef = useRef(null)
   const hideTimer = useRef(null)
   const reachedRef = useRef(false)
+  const initGoalRef = useRef(true)
+
+  const resolvedAppearance = resolveAppearance(appearance)
+  const themeTokens = resolvedAppearance.tokens
 
   useTypewriterScroll(textareaRef, zen)
 
-  // ── 音频音量同步 ──
+  useEffect(() => {
+    const root = document.documentElement
+    const vars = buildAppearanceVars(resolveAppearance(appearance))
+    Object.entries(vars).forEach(([key, value]) => root.style.setProperty(key, value))
+    root.style.color = vars['--text-main']
+    document.body.style.backgroundColor = vars['--body-bg']
+    document.body.style.color = vars['--text-main']
+  }, [appearance])
+
   useEffect(() => {
     setKeyboardVolume(sound.keyVol)
   }, [sound.keyVol])
 
   useEffect(() => {
-    AMBIENT_LIST.forEach((a) =>
-      setAmbient(a.id, !!sound.ambients[a.id], sound.ambientVol[a.id] ?? 0.5),
+    AMBIENT_LIST.forEach((ambient) =>
+      setAmbient(
+        ambient.id,
+        !!sound.ambients[ambient.id],
+        sound.ambientVol[ambient.id] ?? 0.5,
+      ),
     )
-  }, [sound.ambients])
+  }, [sound.ambients, sound.ambientVol])
 
   useEffect(() => {
-    AMBIENT_LIST.forEach((a) => setAmbientVolume(a.id, sound.ambientVol[a.id] ?? 0.5))
+    AMBIENT_LIST.forEach((ambient) =>
+      setAmbientVolume(ambient.id, sound.ambientVol[ambient.id] ?? 0.5),
+    )
   }, [sound.ambientVol])
 
-  // ── 按键音效 ──
   const handleKeyDown = useCallback(
-    (e) => {
-      // Esc 退出专注 / 禅模式
-      if (e.key === 'Escape' && (focus || zen)) {
+    (event) => {
+      if (event.key === 'Escape' && (focus || zen)) {
         setFocus(false)
         setZen(false)
         return
       }
-      if (!sound.keyOn) return
-      if (e.metaKey || e.ctrlKey || e.altKey) return
-      const isType =
-        TYPED_KEYS.test(e.key) || e.key === 'Enter' || e.key === 'Backspace' || e.key === 'Tab'
-      if (!isType) return
+      if (!sound.keyOn || event.metaKey || event.ctrlKey || event.altKey) return
+      const isTypeKey =
+        TYPED_KEYS.test(event.key) ||
+        event.key === 'Enter' ||
+        event.key === 'Backspace' ||
+        event.key === 'Tab'
+      if (!isTypeKey) return
       resumeAudio()
-      if (e.key === 'Enter') playReturn()
-      else playKey(sound.keyProfile, e.key === ' ' || e.code === 'Space')
+      if (event.key === 'Enter') playReturn()
+      else playKey(sound.keyProfile, event.key === ' ' || event.code === 'Space')
       stats.recordKey()
     },
     [sound.keyOn, sound.keyProfile, focus, zen, setZen, stats],
   )
 
-  // ── 专注模式下隐藏界面，鼠标移动短暂唤出 ──
   useEffect(() => {
     if (!focus) {
       setUiVisible(true)
@@ -113,15 +136,14 @@ export default function App() {
     }
   }, [focus])
 
-  // ── 全局快捷键 ──
   useEffect(() => {
-    const onKey = (e) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-        e.preventDefault()
-        setFocus((f) => !f)
+    const onKey = (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+        event.preventDefault()
+        setFocus((value) => !value)
       }
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 's') {
-        e.preventDefault()
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
+        event.preventDefault()
         exportTxt(text)
         flash('已导出 .txt')
       }
@@ -130,8 +152,6 @@ export default function App() {
     return () => window.removeEventListener('keydown', onKey)
   }, [text])
 
-  // ── 每日目标达成：叶子开花 + 提示 ──
-  const initGoalRef = useRef(true)
   useEffect(() => {
     const reached = goal > 0 && stats.todayWords >= goal
     if (initGoalRef.current) {
@@ -152,8 +172,8 @@ export default function App() {
     }
   }, [stats.todayWords, goal])
 
-  const flash = (msg) => {
-    setToast(msg)
+  const flash = (message) => {
+    setToast(message)
     setTimeout(() => setToast(null), 1800)
   }
 
@@ -164,20 +184,23 @@ export default function App() {
 
   const activeAmbients = Object.values(sound.ambients).filter(Boolean).length
   const anySoundOn = sound.keyOn || activeAmbients > 0
+  const petalColors = [
+    themeTokens.accentMuted,
+    themeTokens.accentSoft,
+    themeTokens.accent,
+    themeTokens.accentStrong,
+  ]
 
   return (
     <div
-      className="min-h-screen flex flex-col bg-gradient-to-b from-sand-100 to-sand-200 text-ink-600"
+      className="app-shell min-h-screen flex flex-col bg-gradient-to-b from-[var(--app-bg-start)] to-[var(--app-bg-end)] text-[var(--text-main)]"
       onPointerDown={resumeAudio}
-      onClick={(e) => {
-        // 点击空白处收起浮层
-        if (e.target === e.currentTarget) closePanels()
+      onClick={(event) => {
+        if (event.target === event.currentTarget) closePanels()
       }}
     >
-      {/* 氛围视觉层 */}
       <AmbientBackdrop ambients={sound.ambients} ambientVol={sound.ambientVol} />
 
-      {/* ─────────── 顶栏 ─────────── */}
       <header
         className={`fixed top-0 inset-x-0 z-30 transition-opacity duration-500 ${
           focus && !uiVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'
@@ -186,32 +209,33 @@ export default function App() {
         <div className="max-w-3xl mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2.5 select-none">
             <span
-              className={`relative flex items-center justify-center w-8 h-8 rounded-xl bg-sage-400 text-sand-50 shadow-sm ${
+              className={`relative flex items-center justify-center w-8 h-8 rounded-xl bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm ${
                 bloom ? 'bloom' : ''
               }`}
             >
               <IconLeaf width={18} height={18} />
               {bloom &&
-                [...Array(8)].map((_, i) => {
-                  const ang = (i / 8) * Math.PI * 2
-                  const colors = ['#C9ADA7', '#A9B49A', '#B89A92', '#849069']
+                [...Array(8)].map((_, index) => {
+                  const angle = (index / 8) * Math.PI * 2
                   return (
                     <span
-                      key={i}
+                      key={index}
                       className="petal"
                       style={{
-                        '--px': `${Math.cos(ang) * 26}px`,
-                        '--py': `${Math.sin(ang) * 26}px`,
-                        background: colors[i % colors.length],
-                        animationDelay: `${i * 18}ms`,
+                        '--px': `${Math.cos(angle) * 26}px`,
+                        '--py': `${Math.sin(angle) * 26}px`,
+                        background: petalColors[index % petalColors.length],
+                        animationDelay: `${index * 18}ms`,
                       }}
                     />
                   )
                 })}
             </span>
             <div className="leading-none">
-              <span className="font-serif text-lg text-ink-700 tracking-wide">EchoType</span>
-              <span className="block text-[10px] text-ink-400 mt-0.5 tracking-widest">
+              <span className="font-serif text-lg text-[var(--text-strong)] tracking-wide">
+                EchoType
+              </span>
+              <span className="block text-[10px] text-[var(--text-soft)] mt-0.5 tracking-widest">
                 听得见的写作
               </span>
             </div>
@@ -225,10 +249,18 @@ export default function App() {
             >
               {anySoundOn ? <IconSound /> : <IconMute />}
               {activeAmbients > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-clay-400 text-sand-50 text-[9px] flex items-center justify-center">
+                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-[var(--accent-muted)] text-[var(--accent-contrast)] text-[9px] flex items-center justify-center">
                   {activeAmbients}
                 </span>
               )}
+            </TopButton>
+
+            <TopButton
+              active={panel === 'appearance'}
+              onClick={() => setPanel(panel === 'appearance' ? null : 'appearance')}
+              title="外观主题"
+            >
+              <IconPalette />
             </TopButton>
 
             <TopButton
@@ -243,7 +275,7 @@ export default function App() {
               <TopButton
                 active={exportOpen}
                 onClick={() => {
-                  setExportOpen((v) => !v)
+                  setExportOpen((value) => !value)
                   setPanel(null)
                 }}
                 title="导出"
@@ -251,7 +283,7 @@ export default function App() {
                 <IconExport />
               </TopButton>
               {exportOpen && (
-                <div className="absolute right-0 mt-2 w-40 rounded-xl bg-sand-50 shadow-xl shadow-ink-700/10 ring-1 ring-sand-300/70 py-1.5 animate-fade-in">
+                <div className="absolute right-0 mt-2 w-40 rounded-xl bg-[var(--panel-bg)] shadow-[0_20px_25px_-5px_var(--shadow-color)] ring-1 ring-[var(--line-color)] py-1.5 animate-fade-in">
                   <MenuItem
                     onClick={() => {
                       exportTxt(text)
@@ -282,24 +314,34 @@ export default function App() {
               )}
             </div>
 
-            <div className="w-px h-5 bg-sand-300 mx-1" />
+            <div className="w-px h-5 bg-[var(--line-color)] mx-1" />
 
-            <TopButton active={zen} onClick={() => setZen((z) => !z)} title="禅模式 · 打字机居中">
+            <TopButton active={zen} onClick={() => setZen((value) => !value)} title="禅模式 · 打字机居中">
               <IconZen />
             </TopButton>
 
-            <TopButton active={focus} onClick={() => setFocus((f) => !f)} title="专注模式 (Ctrl+Enter)">
+            <TopButton
+              active={focus}
+              onClick={() => setFocus((value) => !value)}
+              title="专注模式 (Ctrl+Enter)"
+            >
               <IconFocus />
             </TopButton>
           </div>
         </div>
       </header>
 
-      {/* 浮层面板 */}
       {panel && (
         <div className="fixed top-[64px] right-5 z-40">
           {panel === 'sound' && (
             <SoundPanel sound={sound} setSound={setSound} onClose={() => setPanel(null)} />
+          )}
+          {panel === 'appearance' && (
+            <AppearancePanel
+              appearance={appearance}
+              setAppearance={setAppearance}
+              onClose={() => setPanel(null)}
+            />
           )}
           {panel === 'stats' && (
             <StatsPanel stats={stats} goal={goal} setGoal={setGoal} onClose={() => setPanel(null)} />
@@ -307,66 +349,69 @@ export default function App() {
         </div>
       )}
 
-      {/* ─────────── 写作区 ─────────── */}
       <main className="relative z-10 flex-1 flex justify-center pt-16 pb-20 px-5">
         <div className="w-full max-w-3xl flex flex-col">
           <textarea
             ref={textareaRef}
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(event) => setText(event.target.value)}
             onKeyDown={handleKeyDown}
             onFocus={resumeAudio}
             spellCheck={false}
             autoFocus
             placeholder="在这里开始书写，让每一次敲击都有回响……"
             style={zen ? { paddingTop: '42vh', paddingBottom: '42vh' } : undefined}
-            className="echo-editor flex-1 w-full bg-transparent outline-none border-none resize-none
-                       font-serif text-ink-700 text-[19px] leading-[2.1] tracking-wide
-                       placeholder:text-ink-400/50 py-10"
+            className="echo-editor flex-1 w-full bg-transparent outline-none border-none resize-none font-serif text-[var(--text-strong)] text-[19px] leading-[2.1] tracking-wide py-10"
           />
         </div>
       </main>
 
-      {/* ─────────── 底栏 ─────────── */}
       <footer
         className={`fixed bottom-0 inset-x-0 z-20 transition-opacity duration-500 ${
           focus && !uiVisible ? 'opacity-0 pointer-events-none' : 'opacity-100'
         }`}
       >
-        <div className="max-w-3xl mx-auto px-5 h-14 flex items-center justify-between text-[13px] text-ink-400">
+        <div className="max-w-3xl mx-auto px-5 h-14 flex items-center justify-between text-[13px] text-[var(--text-soft)]">
           <div className="flex items-center gap-4">
             <span>
-              <span className="font-serif text-ink-600 text-base">{stats.liveWordCount.toLocaleString()}</span>{' '}
+              <span className="font-serif text-[var(--text-main)] text-base">
+                {stats.liveWordCount.toLocaleString()}
+              </span>{' '}
               字
             </span>
-            <span className="hidden sm:inline text-ink-400/70">{stats.charCount} 字符</span>
+            <span className="hidden sm:inline opacity-80">{stats.charCount} 字符</span>
           </div>
 
           <div className="flex items-center gap-4">
             <button
               onClick={() => setPanel(panel === 'stats' ? null : 'stats')}
-              className="flex items-center gap-1.5 hover:text-ink-600 transition-colors"
+              className="flex items-center gap-1.5 hover:text-[var(--text-main)] transition-colors"
               title="每日目标"
             >
               <GoalRing value={stats.todayWords} goal={goal} />
-              <span className="text-ink-400/70">{stats.todayWords}/{goal}</span>
+              <span className="opacity-80">
+                {stats.todayWords}/{goal}
+              </span>
             </button>
             {stats.streak > 0 && (
-              <span className="flex items-center gap-1 text-clay-500">
+              <span className="flex items-center gap-1 text-[var(--accent-strong)]">
                 <IconFlame width={14} height={14} />
                 连续 {stats.streak} 天
               </span>
             )}
-            {focus && <span className="text-sage-500 animate-soft-pulse">专注模式 · Esc 退出</span>}
+            {focus && (
+              <span className="text-[var(--accent-strong)] animate-soft-pulse">
+                专注模式 · Esc 退出
+              </span>
+            )}
           </div>
         </div>
       </footer>
 
-      {/* Toast 提示 */}
       {toast && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
-          <div className="flex items-center gap-2 bg-ink-600 text-sand-50 text-sm px-4 py-2 rounded-full shadow-lg">
-            <IconCheck width={15} height={15} className="text-sage-300" />
+          <div className="flex items-center gap-2 bg-[var(--toast-bg)] text-[var(--text-inverse)] text-sm px-4 py-2 rounded-full shadow-lg">
+            <IconCheck width={15} height={15} className="text-[var(--accent-soft)]" />
             {toast}
           </div>
         </div>
@@ -377,22 +422,23 @@ export default function App() {
 
 function GoalRing({ value, goal }) {
   const r = 7
-  const c = 2 * Math.PI * r
-  const pct = Math.min(1, value / Math.max(1, goal))
-  const done = pct >= 1
+  const circumference = 2 * Math.PI * r
+  const progress = Math.min(1, value / Math.max(1, goal))
+  const done = progress >= 1
+
   return (
     <svg width="18" height="18" viewBox="0 0 18 18" className="-rotate-90">
-      <circle cx="9" cy="9" r={r} fill="none" stroke="#DBD3C5" strokeWidth="2.5" />
+      <circle cx="9" cy="9" r={r} fill="none" stroke="var(--line-color)" strokeWidth="2.5" />
       <circle
         cx="9"
         cy="9"
         r={r}
         fill="none"
-        stroke={done ? '#849069' : '#909E7E'}
+        stroke={done ? 'var(--accent-strong)' : 'var(--accent)'}
         strokeWidth="2.5"
         strokeLinecap="round"
-        strokeDasharray={c}
-        strokeDashoffset={c * (1 - pct)}
+        strokeDasharray={circumference}
+        strokeDashoffset={circumference * (1 - progress)}
         style={{ transition: 'stroke-dashoffset 0.7s ease' }}
       />
     </svg>
@@ -406,8 +452,8 @@ function TopButton({ children, active, onClick, title }) {
       title={title}
       className={`relative flex items-center justify-center w-9 h-9 rounded-xl transition-all ${
         active
-          ? 'bg-sage-400 text-sand-50 shadow-sm'
-          : 'text-ink-500 hover:bg-sand-300/60 hover:text-ink-700'
+          ? 'bg-[var(--accent)] text-[var(--accent-contrast)] shadow-sm'
+          : 'text-[var(--text-main)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-strong)]'
       }`}
     >
       {children}
@@ -419,7 +465,7 @@ function MenuItem({ children, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="w-full text-left px-4 py-2 text-sm text-ink-500 hover:bg-sand-200 hover:text-ink-700 transition-colors"
+      className="w-full text-left px-4 py-2 text-sm text-[var(--text-main)] hover:bg-[var(--hover-bg)] hover:text-[var(--text-strong)] transition-colors"
     >
       {children}
     </button>

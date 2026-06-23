@@ -109,3 +109,13 @@ export const IconLeaf = (p) => (
     <path d="M9 15c2-3 4-5 7-6" />
   </svg>
 )
+
+export const IconPalette = (p) => (
+  <svg {...base} {...p}>
+    <path d="M12 3c-5 0-9 3.7-9 8.3S6.8 20 11 20h1.7c1.3 0 2.3-1 2.3-2.2 0-.7-.3-1.3-.8-1.8-.4-.4-.2-1.1.4-1.2l1.6-.2c3.4-.4 5.8-2.7 5.8-5.8C22 5.8 17.5 3 12 3z" />
+    <circle cx="7.8" cy="11" r="1" />
+    <circle cx="10.7" cy="8.1" r="1" />
+    <circle cx="14.8" cy="8.2" r="1" />
+    <circle cx="16.8" cy="12.1" r="1" />
+  </svg>
+)

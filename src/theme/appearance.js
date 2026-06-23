@@ -1,0 +1,440 @@
+const createThemeDefaultOption = (type) => ({
+  id: 'theme-default',
+  label: '跟随主题',
+  type,
+})
+
+export const BACKGROUND_OPTIONS = {
+  'theme-default': createThemeDefaultOption('background'),
+  'paper-ivory': {
+    id: 'paper-ivory',
+    label: '羊皮纸',
+    bodyBg: '#F5EFE4',
+    appBgStart: '#FAF7EF',
+    appBgEnd: '#EDE4D2',
+  },
+  'sage-wash': {
+    id: 'sage-wash',
+    label: '鼠尾草',
+    bodyBg: '#E7EDE3',
+    appBgStart: '#EEF2EA',
+    appBgEnd: '#DDE6D8',
+  },
+  'mist-blue': {
+    id: 'mist-blue',
+    label: '雾蓝笺',
+    bodyBg: '#E6EDF2',
+    appBgStart: '#EEF3F6',
+    appBgEnd: '#DBE5EB',
+  },
+  'midnight-slate': {
+    id: 'midnight-slate',
+    label: '夜色石板',
+    bodyBg: '#181816',
+    appBgStart: '#232321',
+    appBgEnd: '#141413',
+  },
+  'ink-night': {
+    id: 'ink-night',
+    label: '月光深夜',
+    bodyBg: '#11161D',
+    appBgStart: '#18212B',
+    appBgEnd: '#0D1218',
+  },
+  'amber-desk': {
+    id: 'amber-desk',
+    label: '旧桌暖黄',
+    bodyBg: '#EFE4C8',
+    appBgStart: '#F4EAD3',
+    appBgEnd: '#E5D0A4',
+  },
+}
+
+export const TEXT_OPTIONS = {
+  'theme-default': createThemeDefaultOption('text'),
+  'ink-brown': {
+    id: 'ink-brown',
+    label: '墨棕',
+    textMain: '#4A443E',
+    textStrong: '#2F2924',
+    textSoft: '#7A736B',
+    caret: '#76876A',
+    selection: 'rgba(144, 158, 126, 0.28)',
+  },
+  'ink-charcoal': {
+    id: 'ink-charcoal',
+    label: '炭黑',
+    textMain: '#3B3A37',
+    textStrong: '#1E1D1B',
+    textSoft: '#6F6B64',
+    caret: '#6C6A66',
+    selection: 'rgba(90, 90, 85, 0.24)',
+  },
+  'ink-green': {
+    id: 'ink-green',
+    label: '墨绿',
+    textMain: '#334136',
+    textStrong: '#243028',
+    textSoft: '#627067',
+    caret: '#6B8164',
+    selection: 'rgba(107, 129, 100, 0.26)',
+  },
+  'ink-blue': {
+    id: 'ink-blue',
+    label: '雾蓝墨',
+    textMain: '#36424C',
+    textStrong: '#25303A',
+    textSoft: '#62717E',
+    caret: '#73899A',
+    selection: 'rgba(115, 137, 154, 0.24)',
+  },
+  'ivory-night': {
+    id: 'ivory-night',
+    label: '夜读暖灰',
+    textMain: '#D7D1C4',
+    textStrong: '#F4EFE2',
+    textSoft: '#B7AF9F',
+    caret: '#D2B06B',
+    selection: 'rgba(185, 152, 90, 0.28)',
+  },
+  'moon-silver': {
+    id: 'moon-silver',
+    label: '月光银色',
+    textMain: '#C9D3DE',
+    textStrong: '#F1F5F9',
+    textSoft: '#95A6B8',
+    caret: '#8FB0CC',
+    selection: 'rgba(143, 176, 204, 0.28)',
+  },
+}
+
+export const THEMES = {
+  parchment: {
+    id: 'parchment',
+    label: '羊皮纸',
+    description: '米白纸页与深棕字色，保留当前的温柔写作气质。',
+    preview: { bg: '#F5EFE4', text: '#4A443E', accent: '#909E7E' },
+    defaultBackgroundId: 'paper-ivory',
+    defaultTextId: 'ink-brown',
+    tokens: {
+      bodyBg: '#F3EFE8',
+      appBgStart: '#F3EFE8',
+      appBgEnd: '#E9E3D9',
+      panelBg: 'rgba(250, 248, 244, 0.95)',
+      panelSoft: 'rgba(243, 239, 232, 0.82)',
+      cardBg: 'rgba(243, 239, 232, 0.8)',
+      hoverBg: 'rgba(219, 211, 197, 0.6)',
+      mutedBg: 'rgba(219, 211, 197, 0.7)',
+      line: 'rgba(219, 211, 197, 0.7)',
+      inputBg: '#FAF8F4',
+      textMain: '#4A443E',
+      textStrong: '#36322D',
+      textSoft: '#7A736B',
+      textInverse: '#FAF8F4',
+      accent: '#909E7E',
+      accentStrong: '#76876A',
+      accentSoft: '#A9B49A',
+      accentContrast: '#FAF8F4',
+      accentMuted: '#C9ADA7',
+      toastBg: '#4A443E',
+      heat0: '#E9E3D9',
+      heat1: '#CBD3BC',
+      heat2: '#A9B49A',
+      heat3: '#849069',
+      heat4: '#5F6E48',
+      selection: 'rgba(144, 158, 126, 0.28)',
+      caret: '#76876A',
+      shadow: 'rgba(54, 50, 45, 0.12)',
+    },
+  },
+  midnight: {
+    id: 'midnight',
+    label: '夜读黑金',
+    description: '深炭纸面配暖灰文字，强调色压低亮度，适合夜间沉浸。',
+    preview: { bg: '#181816', text: '#D7D1C4', accent: '#B9985A' },
+    defaultBackgroundId: 'midnight-slate',
+    defaultTextId: 'ivory-night',
+    tokens: {
+      bodyBg: '#181816',
+      appBgStart: '#20201E',
+      appBgEnd: '#141413',
+      panelBg: 'rgba(36, 35, 32, 0.94)',
+      panelSoft: 'rgba(32, 31, 28, 0.88)',
+      cardBg: 'rgba(44, 42, 38, 0.84)',
+      hoverBg: 'rgba(83, 76, 65, 0.42)',
+      mutedBg: 'rgba(58, 55, 48, 0.74)',
+      line: 'rgba(120, 110, 93, 0.28)',
+      inputBg: '#2A2925',
+      textMain: '#D7D1C4',
+      textStrong: '#F4EFE2',
+      textSoft: '#A79F91',
+      textInverse: '#171614',
+      accent: '#B9985A',
+      accentStrong: '#D2B06B',
+      accentSoft: '#8F7B58',
+      accentContrast: '#171614',
+      accentMuted: '#6D6149',
+      toastBg: '#F4EFE2',
+      heat0: '#2F2D29',
+      heat1: '#51493E',
+      heat2: '#857256',
+      heat3: '#B9985A',
+      heat4: '#D9C48B',
+      selection: 'rgba(185, 152, 90, 0.28)',
+      caret: '#D2B06B',
+      shadow: 'rgba(0, 0, 0, 0.3)',
+    },
+  },
+  nocturne: {
+    id: 'nocturne',
+    label: '夜色书库',
+    description: '蓝黑纸底配月光银字，更适合暗黑环境下长时间使用。',
+    preview: { bg: '#11161D', text: '#C9D3DE', accent: '#7EA6C7' },
+    defaultBackgroundId: 'ink-night',
+    defaultTextId: 'moon-silver',
+    tokens: {
+      bodyBg: '#11161D',
+      appBgStart: '#18212B',
+      appBgEnd: '#0D1218',
+      panelBg: 'rgba(22, 30, 39, 0.94)',
+      panelSoft: 'rgba(20, 27, 35, 0.88)',
+      cardBg: 'rgba(29, 38, 49, 0.84)',
+      hoverBg: 'rgba(76, 101, 126, 0.34)',
+      mutedBg: 'rgba(42, 53, 66, 0.76)',
+      line: 'rgba(102, 122, 145, 0.28)',
+      inputBg: '#1A232D',
+      textMain: '#C9D3DE',
+      textStrong: '#F1F5F9',
+      textSoft: '#95A6B8',
+      textInverse: '#0D1218',
+      accent: '#7EA6C7',
+      accentStrong: '#98BEDD',
+      accentSoft: '#5D7D99',
+      accentContrast: '#0D1218',
+      accentMuted: '#5A7391',
+      toastBg: '#F1F5F9',
+      heat0: '#18202A',
+      heat1: '#2B3A49',
+      heat2: '#486079',
+      heat3: '#7EA6C7',
+      heat4: '#B4D2EA',
+      selection: 'rgba(126, 166, 199, 0.24)',
+      caret: '#8FB0CC',
+      shadow: 'rgba(0, 0, 0, 0.34)',
+    },
+  },
+  forest: {
+    id: 'forest',
+    label: '森林书页',
+    description: '浅鼠尾草纸底和墨绿正文，适合长时间安静书写。',
+    preview: { bg: '#E7EDE3', text: '#334136', accent: '#6B8164' },
+    defaultBackgroundId: 'sage-wash',
+    defaultTextId: 'ink-green',
+    tokens: {
+      bodyBg: '#E7EDE3',
+      appBgStart: '#EEF2EA',
+      appBgEnd: '#DDE6D8',
+      panelBg: 'rgba(244, 247, 240, 0.95)',
+      panelSoft: 'rgba(234, 240, 229, 0.86)',
+      cardBg: 'rgba(232, 237, 228, 0.82)',
+      hoverBg: 'rgba(190, 203, 182, 0.52)',
+      mutedBg: 'rgba(214, 223, 208, 0.82)',
+      line: 'rgba(182, 194, 175, 0.72)',
+      inputBg: '#F4F7F0',
+      textMain: '#334136',
+      textStrong: '#243028',
+      textSoft: '#627067',
+      textInverse: '#F4F7F0',
+      accent: '#819677',
+      accentStrong: '#6B8164',
+      accentSoft: '#A3B29A',
+      accentContrast: '#F4F7F0',
+      accentMuted: '#A49A85',
+      toastBg: '#334136',
+      heat0: '#DDE6D8',
+      heat1: '#B5C4AC',
+      heat2: '#93A887',
+      heat3: '#6B8164',
+      heat4: '#44573F',
+      selection: 'rgba(107, 129, 100, 0.24)',
+      caret: '#6B8164',
+      shadow: 'rgba(51, 65, 54, 0.14)',
+    },
+  },
+  mist: {
+    id: 'mist',
+    label: '雾蓝信笺',
+    description: '雾灰蓝纸底与石墨字色，偏冷静、清透的阅读感。',
+    preview: { bg: '#E6EDF2', text: '#36424C', accent: '#73899A' },
+    defaultBackgroundId: 'mist-blue',
+    defaultTextId: 'ink-blue',
+    tokens: {
+      bodyBg: '#E6EDF2',
+      appBgStart: '#EEF3F6',
+      appBgEnd: '#DBE5EB',
+      panelBg: 'rgba(247, 249, 251, 0.95)',
+      panelSoft: 'rgba(236, 241, 245, 0.88)',
+      cardBg: 'rgba(232, 239, 244, 0.84)',
+      hoverBg: 'rgba(192, 206, 216, 0.5)',
+      mutedBg: 'rgba(216, 225, 232, 0.8)',
+      line: 'rgba(188, 201, 211, 0.78)',
+      inputBg: '#F7F9FB',
+      textMain: '#36424C',
+      textStrong: '#25303A',
+      textSoft: '#66737E',
+      textInverse: '#F7F9FB',
+      accent: '#889BA8',
+      accentStrong: '#73899A',
+      accentSoft: '#A7B7C2',
+      accentContrast: '#F7F9FB',
+      accentMuted: '#A2AAB3',
+      toastBg: '#36424C',
+      heat0: '#DBE5EB',
+      heat1: '#BECFDB',
+      heat2: '#9AAFBF',
+      heat3: '#73899A',
+      heat4: '#4D6270',
+      selection: 'rgba(115, 137, 154, 0.24)',
+      caret: '#73899A',
+      shadow: 'rgba(54, 66, 76, 0.14)',
+    },
+  },
+  typewriter: {
+    id: 'typewriter',
+    label: '复古打字机',
+    description: '旧纸黄背景与打字机黑字，带一点铜棕强调色。',
+    preview: { bg: '#EFE4C8', text: '#2E2621', accent: '#A5674E' },
+    defaultBackgroundId: 'amber-desk',
+    defaultTextId: 'ink-charcoal',
+    tokens: {
+      bodyBg: '#EFE4C8',
+      appBgStart: '#F4EAD3',
+      appBgEnd: '#E5D0A4',
+      panelBg: 'rgba(251, 244, 226, 0.94)',
+      panelSoft: 'rgba(244, 233, 205, 0.88)',
+      cardBg: 'rgba(243, 231, 202, 0.84)',
+      hoverBg: 'rgba(210, 184, 136, 0.48)',
+      mutedBg: 'rgba(230, 212, 174, 0.84)',
+      line: 'rgba(206, 184, 146, 0.8)',
+      inputBg: '#FBF4E2',
+      textMain: '#3B332D',
+      textStrong: '#2E2621',
+      textSoft: '#786D62',
+      textInverse: '#FBF4E2',
+      accent: '#B37A61',
+      accentStrong: '#A5674E',
+      accentSoft: '#C79B85',
+      accentContrast: '#FBF4E2',
+      accentMuted: '#8F7A5F',
+      toastBg: '#2E2621',
+      heat0: '#E8D7B4',
+      heat1: '#D8BF8A',
+      heat2: '#C99D6C',
+      heat3: '#A5674E',
+      heat4: '#704536',
+      selection: 'rgba(165, 103, 78, 0.22)',
+      caret: '#A5674E',
+      shadow: 'rgba(59, 51, 45, 0.16)',
+    },
+  },
+}
+
+export const THEME_LIST = Object.values(THEMES)
+export const BACKGROUND_LIST = Object.values(BACKGROUND_OPTIONS)
+export const TEXT_LIST = Object.values(TEXT_OPTIONS)
+
+export const DEFAULT_APPEARANCE = {
+  themeId: 'parchment',
+  backgroundId: 'theme-default',
+  textId: 'theme-default',
+}
+
+export function selectThemeAppearance(currentAppearance = DEFAULT_APPEARANCE, themeId) {
+  return {
+    ...currentAppearance,
+    themeId,
+    backgroundId: DEFAULT_APPEARANCE.backgroundId,
+    textId: DEFAULT_APPEARANCE.textId,
+  }
+}
+
+function pickTheme(themeId) {
+  return THEMES[themeId] || THEMES[DEFAULT_APPEARANCE.themeId]
+}
+
+function pickBackground(theme, backgroundId) {
+  if (!backgroundId || backgroundId === 'theme-default') {
+    return BACKGROUND_OPTIONS['theme-default']
+  }
+  return BACKGROUND_OPTIONS[backgroundId] || BACKGROUND_OPTIONS[DEFAULT_APPEARANCE.backgroundId]
+}
+
+function pickText(theme, textId) {
+  if (!textId || textId === 'theme-default') {
+    return TEXT_OPTIONS['theme-default']
+  }
+  return TEXT_OPTIONS[textId] || TEXT_OPTIONS[DEFAULT_APPEARANCE.textId]
+}
+
+export function resolveAppearance(appearance = DEFAULT_APPEARANCE) {
+  const theme = pickTheme(appearance.themeId)
+  const background = pickBackground(theme, appearance.backgroundId)
+  const text = pickText(theme, appearance.textId)
+
+  const resolvedBackground =
+    background.id === 'theme-default'
+      ? BACKGROUND_OPTIONS[theme.defaultBackgroundId]
+      : background
+  const resolvedText = text.id === 'theme-default' ? TEXT_OPTIONS[theme.defaultTextId] : text
+
+  return {
+    theme,
+    background,
+    text,
+    tokens: {
+      ...theme.tokens,
+      bodyBg: resolvedBackground.bodyBg,
+      appBgStart: resolvedBackground.appBgStart,
+      appBgEnd: resolvedBackground.appBgEnd,
+      textMain: resolvedText.textMain,
+      textStrong: resolvedText.textStrong,
+      textSoft: resolvedText.textSoft,
+      caret: resolvedText.caret,
+      selection: resolvedText.selection,
+    },
+  }
+}
+
+export function buildAppearanceVars(resolvedAppearance) {
+  const { tokens } = resolvedAppearance
+  return {
+    '--body-bg': tokens.bodyBg,
+    '--app-bg-start': tokens.appBgStart,
+    '--app-bg-end': tokens.appBgEnd,
+    '--panel-bg': tokens.panelBg,
+    '--panel-soft': tokens.panelSoft,
+    '--card-bg': tokens.cardBg,
+    '--hover-bg': tokens.hoverBg,
+    '--muted-bg': tokens.mutedBg,
+    '--line-color': tokens.line,
+    '--input-bg': tokens.inputBg,
+    '--text-main': tokens.textMain,
+    '--text-strong': tokens.textStrong,
+    '--text-soft': tokens.textSoft,
+    '--text-inverse': tokens.textInverse,
+    '--accent': tokens.accent,
+    '--accent-strong': tokens.accentStrong,
+    '--accent-soft': tokens.accentSoft,
+    '--accent-contrast': tokens.accentContrast,
+    '--accent-muted': tokens.accentMuted,
+    '--toast-bg': tokens.toastBg,
+    '--heat-0': tokens.heat0,
+    '--heat-1': tokens.heat1,
+    '--heat-2': tokens.heat2,
+    '--heat-3': tokens.heat3,
+    '--heat-4': tokens.heat4,
+    '--selection-color': tokens.selection,
+    '--caret-color': tokens.caret,
+    '--shadow-color': tokens.shadow,
+  }
+}
